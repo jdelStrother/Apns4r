@@ -1,6 +1,6 @@
 OPTIONS =
   if defined?(Rails.env)
-    raw_config = File.read(Rails.root.join("config", "apns4r.yml")
+    raw_config = File.read(Rails.root.join("config", "apns4r.yml"))
     parsed_config = ERB.new(raw_config).result
     YAML.load(parsed_config)[Rails.env].symbolize_keys
   else
