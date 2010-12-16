@@ -8,13 +8,13 @@ module APNs4r
     end
 
     def read
-      @ssl ||= connect
+      @ssl ||= connect(host, port)
 
       records ||= []
-      while record = @@ssl.read(38)
+      while record = @ssl.read(38)
         records << record.unpack('NnH*')
       end
-      @@ssl.close
+      @ssl.close
       records
     end
 
