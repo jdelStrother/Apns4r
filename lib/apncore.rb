@@ -2,10 +2,15 @@ $KCODE='u' and require 'jcode' if RUBY_VERSION =~ /1.8/
 require 'json'
 
 module APNs4r
+  MAX_PAYLOAD_LEN = 256
+  class PayloadTooLarge < RuntimeError
+    def message
+      "Payload is too large, max is #{MAX_PAYLOAD_LEN} bytes"
+    end
+    alias :to_s :message
+  end
 
   class PayloadHash < Hash
-    MAX_PAYLOAD_LEN = 256
-
     def initialize(constructor = {})
       if constructor.is_a?(Hash)
         super()
@@ -26,7 +31,7 @@ module APNs4r
         alert = self[:aps][:alert]
         self[:aps][:alert] = ''
         # can be chopped?
-        if (to_json.length > MAX_PAYLOAD_LEN)
+        if (to_json.length > MAX_PAYLOAD_LEN || !alert.is_a?(String))
           return nil
         else # inefficient way, but payload may be full of unicode-escaped chars, so...
           self[:aps][:alert] = alert
@@ -52,6 +57,7 @@ module APNs4r
 
     def initialize token, payload
       @token, @payload = token, payload
+      raise PayloadTooLarge if !@payload || @payload.length>MAX_PAYLOAD_LEN
     end
 
     # Creates new notification with given token and payload
