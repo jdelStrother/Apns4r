@@ -36,15 +36,16 @@ module SendServer
 end
 
 EventMachine::run {
+  options = APNs4r::OPTIONS
   if APNs4r::Sender.establish_connection :sandbox
     # pinging our device to avoid socket close by APNs
     EventMachine::add_periodic_timer( 300 ) do
       payload = { :ping => Time.now.to_i.to_s }
-      notification = APNs4r::Notification.create OPTIONS[:apns4r_ping_device_token], payload
+      notification = APNs4r::Notification.create options[:apns4r_ping_device_token], payload
       APNs4r::Sender.push notification
     end
     $logger.info "SendServer started"
-    $server = EventMachine::start_server OPTIONS[:apns4r_sendserver_host], OPTIONS[:apns4r_sendserver_port], SendServer
+    $server = EventMachine::start_server options[:apns4r_sendserver_host], options[:apns4r_sendserver_port], SendServer
   else
     $logger.error "SendServer: failed to connect to APNs: timeout"
     exit 1
